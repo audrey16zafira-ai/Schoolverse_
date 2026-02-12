@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore</title>
+
+<style>
+:root{
+  --bg:#120000;--red:#7a0000;--red2:#b11226;
+  --card:#240000;--card2:#320000;
+  --txt:#f5f5f5;--muted:#ffb3b3
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--txt)
+}
+section{display:none;padding:16px}
+section.active{display:block}
+.section{display:none}
+.section.active{display:block}
+.card{
+  background:linear-gradient(160deg,var(--card2),var(--card));
+  padding:18px;border-radius:20px;margin-bottom:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4)
+}
+.badge{
+  display:inline-block;padding:6px 12px;border-radius:999px;
+  background:var(--red2);font-size:12px;margin-bottom:8px
+}
+.hint{font-size:13px;opacity:.7;margin-top:6px}
+button{
+  width:100%;padding:12px;margin-top:10px;
+  border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--red),var(--red2));
+  color:white;font-weight:bold
+}
+input,textarea,select{
+  width:100%;padding:10px;margin-top:8px;
+  border-radius:12px;border:none
+}
+header{
+  background:linear-gradient(135deg,var(--red),var(--red2));
+  padding:16px;text-align:center;font-weight:bold;
+  border-radius:0 0 20px 20px
+}
+nav{display:flex;justify-content:space-around;background:#0d0000}
+nav button{background:none;color:#aaa}
+nav button.active{color:var(--muted);border-bottom:2px solid var(--muted)}
+.progress{
+  height:10px;border-radius:20px;overflow:hidden;
+  background:#000;margin-top:8px
+}
+.progress div{
+  height:100%;width:40%;
+  background:linear-gradient(90deg,var(--red),var(--red2))
+}
+#focusOverlay{
+  display:none;position:fixed;inset:0;
+  background:radial-gradient(circle,var(--card2),black);
+  color:white;align-items:center;justify-content:center;
+  flex-direction:column;z-index:9999
+}
+#timer{font-size:56px}
+</style>
+</head>
+
+<body>
+
+<section id="login" class="active">
+  <div class="card">
+    <span class="badge">EduCore</span>
+    <h2>Sistem Sekolah Terpadu</h2>
+    <button onclick="login('siswa')">Masuk Mode Siswa</button>
+    <button onclick="login('guru')">Masuk Mode Guru</button>
+  </div>
+</section>
+
+<section id="siswa">
+<header>EduCore — Mode Siswa</header>
+<nav>
+  <button class="active" onclick="openSiswa('home',this)">Home</button>
+  <button onclick="openSiswa('absen',this)">Absen</button>
+  <button onclick="openSiswa('fokus',this)">Fokus</button>
+  <button onclick="openSiswa('materi',this)">Materi</button>
+  <button onclick="openSiswa('bahasa',this)">Bahasa</button>
+  <button onclick="openSiswa('curhat',this)">Curhat</button>
+</nav>
+
+<div id="s-home" class="section active">
+  <div class="card">
+    <h3>Halo</h3>
+    <div class="progress"><div></div></div>
+  </div>
+</div>
+
+<div id="s-absen" class="section">
+  <div class="card">
+    <input id="nama" placeholder="Nama lengkap">
+    <button onclick="absen()">Kirim Absen</button>
+  </div>
+</div>
+
+<div id="s-fokus" class="section">
+  <div class="card">
+    <input type="number" id="durasi" placeholder="Durasi (menit)">
+    <button onclick="startFocus()">Mulai Fokus</button>
+  </div>
+</div>
+
+<div id="s-materi" class="section">
+  <div class="card">
+    <div id="materiList">Belum ada materi</div>
+  </div>
+</div>
+
+<div id="s-bahasa" class="section">
+  <div class="card">
+    <p id="soal">—</p>
+    <input id="inputJawab" placeholder="Ketik terjemahan">
+    <select id="jawab"></select>
+    <button onclick="cek()">Cek Jawaban</button>
+    <p id="hasil">—</p>
+    <p id="skor">Skor: 0/0</p>
+  </div>
+</div>
+
+<div id="s-curhat" class="section">
+  <div class="card">
+    <textarea id="curhatText"></textarea>
+    <button onclick="kirimCurhat()">Kirim Curhat</button>
+  </div>
+</div>
+
+<button onclick="logout()">Logout</button>
+</section>
+
+<section id="guru">
+<header>EduCore — Mode Guru</header>
+<nav>
+  <button class="active" onclick="openGuru('dash',this)">Dashboard</button>
+  <button onclick="openGuru('absen',this)">Absensi</button>
+  <button onclick="openGuru('materi',this)">Materi</button>
+  <button onclick="openGuru('curhat',this)">Curhat</button>
+</nav>
+
+<div id="g-dash" class="section active">
+  <div class="card"><h3>Panel Guru</h3></div>
+</div>
+
+<div id="g-absen" class="section">
+  <div class="card"><ul id="listAbsen">Belum ada data</ul></div>
+</div>
+
+<div id="g-materi" class="section">
+  <div class="card">
+    <input id="judulMateri" placeholder="Judul materi">
+    <textarea id="isiMateri" placeholder="Isi materi"></textarea>
+    <button onclick="uploadMateri()">Upload</button>
+  </div>
+</div>
+
+<div id="g-curhat" class="section">
+  <div class="card"><ul id="curhatList">Belum ada curhat</ul></div>
+</div>
+
+<button onclick="logout()">Logout</button>
+</section>
+
+<div id="focusOverlay">
+  <h1>MODE FOKUS</h1>
+  <h2 id="timer">00:00</h2>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+function login(r){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  $(r).classList.add("active");
+}
+function logout(){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  $("login").classList.add("active");
+}
+
+function openSiswa(id,b){
+  document.querySelectorAll("#siswa .section").forEach(s=>s.classList.remove("active"));
+  $("s-"+id).classList.add("active");
+  document.querySelectorAll("#siswa nav button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  if(id==="materi") loadMateri();
+}
+function openGuru(id,b){
+  document.querySelectorAll("#guru .section").forEach(s=>s.classList.remove("active"));
+  $("g-"+id).classList.add("active");
+  document.querySelectorAll("#guru nav button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  if(id==="absen") loadAbsen();
+  if(id==="curhat") loadCurhat();
+}
+
+function absen(){
+  let n=$("nama").value.trim();
+  if(!n) return;
+  let a=JSON.parse(localStorage.getItem("absen")||"[]")
+    .filter(x=>x && x.nama && x.w);
+  a.push({nama:n,w:new Date().toLocaleString()});
+  localStorage.setItem("absen",JSON.stringify(a));
+  $("nama").value="";
+}
+
+function loadAbsen(){
+  let a=JSON.parse(localStorage.getItem("absen")||"[]")
+    .filter(x=>x && x.nama && x.w);
+  $("listAbsen").innerHTML=a.length
+    ? a.map(x=>`<li>${x.nama} — ${x.w}</li>`).join("")
+    : "Belum ada data";
+}
+
+function uploadMateri(){
+  let j=$("judulMateri").value.trim();
+  let i=$("isiMateri").value.trim();
+  if(!j||!i) return;
+  let m=JSON.parse(localStorage.getItem("materi")||"[]")
+    .filter(x=>x && x.j && x.i);
+  m.push({j:j,i:i});
+  localStorage.setItem("materi",JSON.stringify(m));
+  $("judulMateri").value="";
+  $("isiMateri").value="";
+}
+
+function loadMateri(){
+  let m=JSON.parse(localStorage.getItem("materi")||"[]")
+    .filter(x=>x && x.j && x.i);
+  $("materiList").innerHTML=m.length
+    ? m.map(x=>`<div class="card"><h4>${x.j}</h4><p>${x.i}</p></div>`).join("")
+    : "Belum ada materi";
+}
+
+function kirimCurhat(){
+  let t=$("curhatText").value.trim();
+  if(!t) return;
+  let c=JSON.parse(localStorage.getItem("curhat")||"[]")
+    .filter(x=>typeof x==="string" && x.trim()!=="");
+  c.push(t);
+  localStorage.setItem("curhat",JSON.stringify(c));
+  $("curhatText").value="";
+}
+
+function loadCurhat(){
+  let c=JSON.parse(localStorage.getItem("curhat")||"[]")
+    .filter(x=>typeof x==="string" && x.trim()!=="");
+  $("curhatList").innerHTML=c.length
+    ? c.map(x=>`<li>${x}</li>`).join("")
+    : "Belum ada curhat";
+}
+
+let t,intv;
+function startFocus(){
+  let d=parseInt($("durasi").value);
+  if(!d||d<=0) return;
+  t=d*60;$("focusOverlay").style.display="flex";
+  intv=setInterval(()=>{
+    t--;
+    $("timer").innerText=
+      String(Math.floor(t/60)).padStart(2,"0")+":"+
+      String(t%60).padStart(2,"0");
+    if(t<=0){clearInterval(intv);$("focusOverlay").style.display="none";}
+  },1000);
+}
+</script>
+
+</body>
+</html>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "API_KAMU",
+  authDomain: "PROJECT_KAMU.firebaseapp.com",
+  databaseURL: "https://PROJECT_KAMU-default-rtdb.firebaseio.com",
+  projectId: "PROJECT_KAMU",
+  storageBucket: "PROJECT_KAMU.appspot.com",
+  messagingSenderId: "ID_KAMU",
+  appId: "APP_ID_KAMU"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ===== ABSEN ===== */
+window.kirimAbsen = function(){
+  let nama=document.getElementById("namaAbsen").value;
+  if(!nama) return;
+  push(ref(db,"absen"),{
+    nama:nama,
+    w:new Date().toLocaleString()
+  });
+};
+
+onValue(ref(db,"absen"),(snapshot)=>{
+  let data=snapshot.val()||{};
+  let html="";
+  for(let id in data){
+    html+=`<li>${data[id].nama} — ${data[id].w}</li>`;
+  }
+  document.getElementById("listAbsen").innerHTML=html;
+});
+</script>
